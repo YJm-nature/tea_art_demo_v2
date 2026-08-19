@@ -1,0 +1,7 @@
+{"observation_id":"obj_utensils_s1","phase":"completed","end_time":5.0,"confidence":0.95}
+{"observation_id":"seq_warm_clean_order","phase":"completed","end_time":15.0,"confidence":0.90}
+{"observation_id":"action_tea_canister_to_lotus","phase":"completed","end_time":20.0,"confidence":0.90}
+{"observation_id":"action_hold_lotus","phase":"completed","end_time":30.0,"confidence":0.90}
+{"observation_id":"action_open_lid_smell","phase":"completed","end_time":40.0,"confidence":0.90}
+{"observation_id":"result_brew_wait_decant_partial","phase":"completed","end_time":55.0,"confidence":0.90}
+{"observation_id":"result_filled_cup_tray_layout","phase":"completed","end_time":65.0,"confidence":0.90}

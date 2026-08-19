@@ -1,0 +1,19 @@
+name: tea-ai-6gb
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pytorch=2.5.1
+  - torchvision=0.20.1
+  - pytorch-cuda=12.1
+  - pip
+  - pip:
+      - ultralytics==8.4.90
+      - opencv-python>=4.8,<5
+      - opencv-contrib-python>=4.12,<5
+      - numpy>=1.24,<3
+      - Pillow>=10,<13
+      - PyYAML>=6,<7
+      - mediapipe>=0.10,<0.11

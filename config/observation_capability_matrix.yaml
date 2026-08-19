@@ -1,0 +1,298 @@
+schema_version: "1.0"
+matrix_id: red_tea_front_capabilities_20260804
+name: 红茶茶艺SOP完整能力矩阵
+sop_config: config/sop_red_tea_front_v1.yaml
+ontology: config/ontology_v1.yaml
+requirement_source: 0611修订茶艺红茶操作流程需求确认表0602.docx
+
+status_definitions:
+  available: 已有实现和基础验证，可进入当前运行管线
+  partial: 只能覆盖需求的一部分，不能代表完整步骤通过
+  experimental: 代码已实现但尚未达到真实视频验收门槛
+  deferred: 缺少器具、数据或模型，当前不得启用
+  deferred_optional: 可选需求，缺失时记录未验证但不判错
+  excluded_current_scope: 按最新确认暂不检测，不进入当前状态机
+
+runtime_constraints:
+  gpu: GTX 1060 6GB
+  cameras_available: 1
+  camera_role: front
+  model_profile: tea18_front
+  detector_architecture: yolov8n
+  pose_architecture: yolov8n-pose
+  formal_scoring_enabled: false
+  low_confidence_policy: needs_review
+  unavailable_policy: omit
+
+detection_classes:
+  - {id: 0, name: 盖碗碗身, status: available, reviewed_instances: 575}
+  - {id: 1, name: 盖碗碗盖, status: experimental, reviewed_instances: 558, gap: 遮挡和手持状态召回率仍需验收}
+  - {id: 2, name: 公道杯, status: available, reviewed_instances: 595}
+  - {id: 3, name: 品茗杯, status: available, reviewed_instances: 1448}
+  - {id: 4, name: 茶荷, status: available, reviewed_instances: 608}
+  - {id: 5, name: 茶巾, status: available, reviewed_instances: 577}
+  - {id: 6, name: 茶夹, status: available, reviewed_instances: 629}
+  - {id: 7, name: 茶拨, status: available, reviewed_instances: 606}
+  - {id: 8, name: 茶盘, status: deferred, reviewed_instances: 0, gap: 需要新正面检测数据和YOLOv8n模型}
+  - {id: 9, name: 烧水壶, status: deferred, reviewed_instances: 0, gap: 需要采购后录制正面检测及关键点数据}
+  - {id: 10, name: 建水, status: available, reviewed_instances: 563}
+  - {id: 11, name: 电子秤, status: deferred_optional, reviewed_instances: 0, gap: 当前没有电子秤}
+  - {id: 12, name: 温度计, status: deferred_optional, reviewed_instances: 0}
+  - {id: 13, name: 计时器, status: deferred_optional, reviewed_instances: 0}
+  - {id: 14, name: 茶叶罐, status: available, reviewed_instances: 578}
+  - {id: 15, name: 茶则, status: deferred, reviewed_instances: 0}
+  - {id: 16, name: 水壶显示屏, status: deferred, reviewed_instances: 0, gap: 需要至少600个温度ROI}
+  - {id: 17, name: 电子秤显示屏, status: deferred, reviewed_instances: 0, gap: 需要至少800个重量ROI}
+
+requirement_observations:
+  - id: O01
+    business_step: step01_setup
+    name: 备具布席物品
+    category: object
+    status: partial
+    runtime_ids: [obj_utensils_s1]
+    implementation: 器具YOLO、ByteTrack、跨帧记忆和必备品清单
+    available_inputs: [当前10类器具模型]
+    gaps: [茶盘, 烧水壶, 电子秤, 温度计, 计时器, 茶则]
+    formal_scoring: false
+
+  - id: O02
+    business_step: step02_warm_clean
+    name: 温杯洁具物品及目标顺序
+    category: object_sequence
+    status: experimental
+    runtime_ids: [seq_warm_clean_front]
+    implementation: YOLOv8n器具、YOLOv8n-pose倾斜、手部关系和盖碗至公道杯至品茗杯至建水顺序状态机
+    available_inputs: [完整观测代码, MediaPipe Hands]
+    gaps: [烧水壶及关键点模型, 正确和错序独立测试视频]
+    formal_scoring: false
+
+  - id: O03
+    business_step: step03_tea_preparation
+    name: 投茶准备物品与转移
+    category: object_action
+    status: experimental
+    runtime_ids: [action_tea_canister_to_lotus]
+    implementation: 手从茶叶罐到茶荷的时序轨迹
+    available_inputs: [茶叶罐, 茶荷, MediaPipe Hands]
+    gaps: [真实茶叶转移证据, 电子秤可选结果]
+    formal_scoring: false
+
+  - id: O04
+    business_step: step04_add_tea_smell
+    name: 投茶闻香物品
+    category: object
+    status: partial
+    runtime_ids: [action_hold_lotus, action_open_lid_smell]
+    implementation: 茶荷、碗身、碗盖轨迹和鼻部关键点
+    available_inputs: [茶荷, 盖碗碗身, 盖碗碗盖, 茶拨]
+    gaps: [茶则, 盖碗遮挡召回率, 独立真实视频验收]
+    formal_scoring: false
+
+  - id: O05
+    business_step: step05_brew
+    name: 注水冲泡物品
+    category: object_sequence
+    status: experimental
+    runtime_ids: [action_water_injection, action_gaiwan_lid_close_brew, action_gaiwan_to_pitcher, result_brew_time_8_12]
+    implementation: 关键点旋冲、碗盖盖合、8至12秒单调计时和盖碗到公道杯姿态关系
+    available_inputs: [盖碗碗身, 盖碗碗盖, 公道杯]
+    gaps: [烧水壶和关键点模型, 正负动作独立测试]
+    formal_scoring: false
+
+  - id: O06
+    business_step: step06_serve
+    name: 分茶奉茶物品
+    category: object_result
+    status: experimental
+    runtime_ids: [action_tea_distribution, result_filled_cup_tray_layout, action_two_hand_serve_tray]
+    implementation: 公道杯目标轨迹、杯位几何以及双手茶盘关系
+    available_inputs: [完整观测代码, 品茗杯]
+    gaps: [茶盘和公道杯关键点新模型, 分茶与奉茶正负视频]
+    formal_scoring: false
+
+  - id: O07
+    business_step: step04_add_tea_smell
+    name: 双手托举茶荷赏茶
+    category: action
+    status: experimental
+    runtime_ids: [action_hold_lotus]
+    implementation: 双手位于茶荷两侧、接触、离桌并稳定5秒
+    available_inputs: [茶荷, MediaPipe Hands]
+    gaps: [100个正例, 100个困难负例, 至少5个session]
+    formal_scoring: false
+
+  - id: O08
+    business_step: step02_warm_clean
+    name: 冲洗盖碗及废水入建水
+    category: action_sequence
+    status: experimental
+    runtime_ids: [seq_warm_clean_front]
+    implementation: 使用水壶到盖碗及公道杯到建水的关键点倾倒时序
+    available_inputs: [盖碗碗身, 建水]
+    gaps: [烧水壶关键点模型, 100正确及100错序或假动作]
+    formal_scoring: false
+
+  - id: O09
+    business_step: step04_add_tea_smell
+    name: 打开盖碗闻香
+    category: action_sequence
+    status: experimental
+    runtime_ids: [action_open_lid_smell]
+    implementation: 盖合、碗盖分离、盖碗靠近鼻部、保持和重新盖合
+    available_inputs: [盖碗碗身, 盖碗碗盖, MediaPipe Pose]
+    gaps: [100完整正例, 150相似负例, 遮挡召回率验收]
+    formal_scoring: false
+
+  - id: O10
+    business_step: step06_serve
+    name: 双手端茶盘
+    category: action
+    status: experimental
+    runtime_ids: [action_two_hand_serve_tray]
+    implementation: 双手位于茶盘两侧、茶盘离桌并向前移动
+    available_inputs: [MediaPipe Hands]
+    gaps: [茶盘模型, 正负动作数据]
+    formal_scoring: false
+
+  - id: O11
+    business_step: step04_add_tea_smell
+    name: 茶荷倾角10至30度
+    category: angle
+    status: experimental
+    runtime_ids: [action_tea_lotus_to_gaiwan]
+    implementation: YOLOv8n-pose三关键点计算连续二维角度
+    available_inputs: [茶荷]
+    gaps: [每5度一档的300至500帧侧面数据]
+    formal_scoring: false
+
+  - id: O12
+    business_step: step04_add_tea_smell
+    name: 盖碗倾角20至40度
+    category: angle
+    status: experimental
+    runtime_ids: [action_gaiwan_to_pitcher]
+    implementation: YOLOv8n-pose三关键点计算连续二维角度
+    available_inputs: [盖碗碗身]
+    gaps: [每5度一档的300至500帧侧面数据]
+    formal_scoring: false
+
+  - id: O13
+    business_step: step05_brew
+    name: 盖合后等待8至12秒再出汤
+    category: timing
+    status: experimental
+    runtime_ids: [result_brew_time_8_12]
+    implementation: 碗盖盖合完成到出汤开始的单调时钟和上下边界判断
+    available_inputs: [action_gaiwan_lid_close_brew, action_gaiwan_to_pitcher]
+    gaps: [50合格序列, 提前出汤负例, 注水完成门控]
+    formal_scoring: false
+
+  - id: O14
+    business_step: step06_serve
+    name: 左到右或右到左分茶
+    category: sequence
+    status: experimental
+    runtime_ids: [action_tea_distribution]
+    implementation: 公道杯出水端依次对准不同杯轨迹ID并检查横向单调顺序
+    available_inputs: [公道杯, 品茗杯, ByteTrack]
+    gaps: [左右方向各50段, 乱序50段, 液流证据]
+    formal_scoring: false
+
+  - id: O15
+    business_step: step03_tea_preparation
+    name: 电子秤3至5克
+    category: ocr_result
+    status: experimental
+    runtime_ids: [result_tea_weight]
+    implementation: YOLOv8n显示屏ROI、OpenCV七段识别、PaddleOCR回退和连续5次中位数
+    available_inputs: [OCR稳定读数代码]
+    gaps: [电子秤, 显示屏框300至500张, OCR裁剪500至1000张]
+    formal_scoring: false
+
+  - id: O16
+    business_step: cross_step
+    name: 无溅水和无茶渣
+    category: segmentation_result
+    status: excluded_current_scope
+    runtime_ids: []
+    implementation: 本阶段明确不识别液柱、液珠、溅水或茶渣
+    available_inputs: []
+    gaps: [1000至1500张ROI, 干净负样本不少于40%]
+    formal_scoring: false
+
+  - id: O17
+    business_step: step02_warm_clean
+    name: 水温90至95摄氏度
+    category: ocr_result
+    status: experimental
+    runtime_ids: [result_water_temperature]
+    implementation: 水壶显示屏ROI七段识别、PaddleOCR回退和连续5次稳定中位数
+    available_inputs: [OCR稳定读数代码]
+    gaps: [烧水壶或温度计, 显示屏框和70至105度OCR数据]
+    formal_scoring: false
+
+  - id: O18
+    business_step: step05_brew
+    name: 水浸没茶叶
+    category: segmentation_result
+    status: excluded_current_scope
+    runtime_ids: []
+    implementation: 本阶段明确不识别液面或实际倒入量
+    available_inputs: [盖碗碗身]
+    gaps: [500至800张盖碗ROI像素掩码]
+    formal_scoring: false
+
+  - id: O19
+    business_step: step06_serve
+    name: 品茗杯布局无错乱
+    category: geometry_result
+    status: partial
+    runtime_ids: [result_cup_layout, result_filled_cup_tray_layout]
+    implementation: 杯中心几何、茶盘包含关系和1秒稳定窗口
+    available_inputs: [品茗杯, result_cup_layout]
+    gaps: [茶盘模型, 茶汤证据, 三类布局各30段及至少3个session]
+    formal_scoring: false
+
+supplementary_observations:
+  - id: A01
+    name: 手部及手腕饰品
+    status: deferred
+    runtime_ids: [result_hand_accessory]
+    implementation: MediaPipe手腕ROI加独立nano检测器
+    gaps: [600至1000张手部ROI, 裸手负样本不少于40%]
+  - id: A02
+    name: 长指甲或装饰指甲
+    status: deferred
+    runtime_ids: []
+    implementation: 计划使用独立手部ROI二分类或检测模型
+    gaps: [至少500张清晰手部ROI]
+
+runtime_observations:
+  - {id: seq_warm_clean_front, step: 2, status: experimental, code: src/observations/front_actions.py}
+  - {id: result_water_temperature, step: 2, status: experimental, code: src/observations/front_actions.py}
+  - {id: result_tea_weight, step: 3, status: experimental, code: src/observations/front_actions.py}
+  - {id: action_tea_lotus_to_gaiwan, step: 4, status: experimental, code: src/observations/front_actions.py}
+  - {id: action_water_injection, step: 5, status: experimental, code: src/observations/front_actions.py}
+  - {id: result_brew_time_8_12, step: 5, status: experimental, code: src/observations/front_actions.py}
+  - {id: action_tea_distribution, step: 6, status: experimental, code: src/observations/front_actions.py}
+  - {id: action_two_hand_serve_tray, step: 6, status: experimental, code: src/observations/front_actions.py}
+  - {id: result_cup_layout, step: 6, status: available, code: src/observations/layout.py}
+  - {id: result_filled_cup_tray_layout, step: 6, status: deferred, code: src/observations/layout.py}
+  - {id: seq_warm_clean_order, step: 2, status: deferred, code: src/observations/warm_clean.py}
+  - {id: action_tea_canister_to_lotus, step: 3, status: experimental, code: src/observations/preparation.py}
+  - {id: action_hold_lotus, step: 4, status: experimental, code: src/observations/preparation.py}
+  - {id: action_open_lid_smell, step: 4, status: experimental, code: src/observations/smell.py}
+  - {id: action_gaiwan_lid_close_brew, step: 5, status: experimental, code: src/observations/brewing.py}
+  - {id: action_gaiwan_to_pitcher, step: 5, status: experimental, code: src/observations/brewing.py}
+  - {id: result_brew_wait_decant_partial, step: 5, status: partial, code: src/observations/brewing.py}
+  - {id: result_hand_accessory, step: 0, status: deferred, code: src/observations/accessory.py}
+  - {id: obj_utensils_s1, step: 1, status: partial, code: src/observation_point.py}
+
+summary:
+  requirement_observation_count: 19
+  available_or_partial_count: 3
+  experimental_count: 14
+  deferred_or_excluded_count: 2
+  formal_scoring_ready_count: 0
+  next_model_dependencies: [正面YOLOv8n器具检测, YOLOv8n-pose关键点, 温度OCR数据, 重量OCR数据]

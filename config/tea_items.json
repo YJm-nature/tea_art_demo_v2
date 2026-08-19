@@ -1,0 +1,432 @@
+{
+  "_description": "茶具物品模板特征库 — 用于几何特征匹配",
+  "_video_info": {
+    "resolution": "3840x2160 (4K)",
+    "inference_resolution": "1280x720",
+    "camera_angle": "top_down",
+    "background": "dark_table",
+    "tea_ware_color": "white_porcelain"
+  },
+  "items": {
+    "盖碗": {
+      "name_cn": "盖碗",
+      "name_en": "Gaiwan",
+      "essential": true,
+      "area_range": [
+        15000,
+        50000
+      ],
+      "aspect_ratio_range": [
+        0.7,
+        1.3
+      ],
+      "circularity_min": 0.7,
+      "position_hint": "center",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        160
+      ],
+      "color_hsv_upper": [
+        180,
+        35,
+        255
+      ],
+      "features": "圆形，带盖，白色，面积最大之单个器皿"
+    },
+    "公道杯": {
+      "name_cn": "公道杯",
+      "name_en": "Fairness Pitcher",
+      "essential": true,
+      "area_range": [
+        8000,
+        30000
+      ],
+      "aspect_ratio_range": [
+        0.6,
+        1.0
+      ],
+      "circularity_min": 0.5,
+      "position_hint": "right_of_gaiwan",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        160
+      ],
+      "color_hsv_upper": [
+        180,
+        35,
+        255
+      ],
+      "features": "圆形略扁，带把或带嘴，白色，在盖碗右侧"
+    },
+    "品茗杯": {
+      "name_cn": "品茗杯",
+      "name_en": "Tasting Cup",
+      "essential": true,
+      "area_range": [
+        2000,
+        10000
+      ],
+      "aspect_ratio_range": [
+        0.7,
+        1.3
+      ],
+      "circularity_min": 0.8,
+      "position_hint": "multiple_grouped",
+      "quantity_range": [
+        3,
+        6
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        160
+      ],
+      "color_hsv_upper": [
+        180,
+        35,
+        255
+      ],
+      "features": "小圆形，多个聚集，白色"
+    },
+    "茶荷": {
+      "name_cn": "茶荷",
+      "name_en": "Tea Lotus",
+      "essential": true,
+      "area_range": [
+        3000,
+        15000
+      ],
+      "aspect_ratio_range": [
+        1.5,
+        4.0
+      ],
+      "circularity_min": 0.3,
+      "position_hint": "near_gaiwan",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        160
+      ],
+      "color_hsv_upper": [
+        180,
+        35,
+        255
+      ],
+      "features": "长条形，白色，一端宽一端窄"
+    },
+    "茶巾": {
+      "name_cn": "茶巾",
+      "name_en": "Tea Towel",
+      "essential": true,
+      "area_range": [
+        5000,
+        30000
+      ],
+      "aspect_ratio_range": [
+        0.5,
+        2.0
+      ],
+      "circularity_min": 0.2,
+      "position_hint": "edge_area",
+      "quantity_range": [
+        1,
+        2
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        100
+      ],
+      "color_hsv_upper": [
+        180,
+        30,
+        220
+      ],
+      "features": "方形/长方形布状，可能有折叠纹理"
+    },
+    "茶夹": {
+      "name_cn": "茶夹",
+      "name_en": "Tea Tongs",
+      "essential": true,
+      "area_range": [
+        500,
+        4000
+      ],
+      "aspect_ratio_range": [
+        2.5,
+        6.0
+      ],
+      "circularity_min": 0.15,
+      "position_hint": "side_area",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        160
+      ],
+      "color_hsv_upper": [
+        180,
+        35,
+        255
+      ],
+      "features": "细长条形，白色/浅色"
+    },
+    "茶拨": {
+      "name_cn": "茶拨",
+      "name_en": "Tea Pick",
+      "essential": true,
+      "area_range": [
+        500,
+        3000
+      ],
+      "aspect_ratio_range": [
+        3.0,
+        8.0
+      ],
+      "circularity_min": 0.1,
+      "position_hint": "side_area",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        160
+      ],
+      "color_hsv_upper": [
+        180,
+        35,
+        255
+      ],
+      "features": "极细长条形，一端扁平"
+    },
+    "茶盘": {
+      "name_cn": "茶盘",
+      "name_en": "Tea Tray",
+      "essential": true,
+      "area_range": [
+        40000,
+        150000
+      ],
+      "aspect_ratio_range": [
+        1.2,
+        2.5
+      ],
+      "circularity_min": 0.3,
+      "position_hint": "center_bottom",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        60
+      ],
+      "color_hsv_upper": [
+        180,
+        40,
+        200
+      ],
+      "features": "大面积矩形，茶盘颜色可能与桌面不同"
+    },
+    "烧水壶": {
+      "name_cn": "烧水壶",
+      "name_en": "Kettle",
+      "essential": true,
+      "area_range": [
+        20000,
+        60000
+      ],
+      "aspect_ratio_range": [
+        0.6,
+        1.5
+      ],
+      "circularity_min": 0.5,
+      "position_hint": "edge",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        100
+      ],
+      "color_hsv_upper": [
+        180,
+        30,
+        255
+      ],
+      "features": "较大，圆形/椭圆形，可能为金属色"
+    },
+    "建水": {
+      "name_cn": "建水",
+      "name_en": "Waste Water Bowl",
+      "essential": true,
+      "area_range": [
+        5000,
+        25000
+      ],
+      "aspect_ratio_range": [
+        0.6,
+        1.3
+      ],
+      "circularity_min": 0.6,
+      "position_hint": "edge",
+      "quantity_range": [
+        1,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        100
+      ],
+      "color_hsv_upper": [
+        180,
+        35,
+        255
+      ],
+      "features": "圆形，通常位于边缘"
+    },
+    "电子秤": {
+      "name_cn": "电子秤",
+      "name_en": "Electronic Scale",
+      "essential": false,
+      "area_range": [
+        8000,
+        30000
+      ],
+      "aspect_ratio_range": [
+        0.6,
+        1.8
+      ],
+      "circularity_min": 0.4,
+      "position_hint": "near_gaiwan",
+      "quantity_range": [
+        0,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        50
+      ],
+      "color_hsv_upper": [
+        180,
+        30,
+        200
+      ],
+      "features": "方形，通常有LCD屏幕"
+    },
+    "温度计": {
+      "name_cn": "温度计",
+      "name_en": "Thermometer",
+      "essential": false,
+      "area_range": [
+        300,
+        3000
+      ],
+      "aspect_ratio_range": [
+        4.0,
+        12.0
+      ],
+      "circularity_min": 0.05,
+      "position_hint": "edge",
+      "quantity_range": [
+        0,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        100
+      ],
+      "color_hsv_upper": [
+        180,
+        30,
+        255
+      ],
+      "features": "极细长探针"
+    },
+    "计时器": {
+      "name_cn": "计时器",
+      "name_en": "Timer",
+      "essential": false,
+      "area_range": [
+        2000,
+        10000
+      ],
+      "aspect_ratio_range": [
+        0.6,
+        1.5
+      ],
+      "circularity_min": 0.5,
+      "position_hint": "edge",
+      "quantity_range": [
+        0,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        50
+      ],
+      "color_hsv_upper": [
+        180,
+        30,
+        200
+      ],
+      "features": "小方形，可能有LCD屏幕"
+    },
+    "茶叶罐": {
+      "name_cn": "茶叶罐",
+      "name_en": "Tea Canister",
+      "essential": false,
+      "area_range": [
+        5000,
+        35000
+      ],
+      "aspect_ratio_range": [
+        0.6,
+        1.6
+      ],
+      "circularity_min": 0.3,
+      "position_hint": "edge",
+      "quantity_range": [
+        0,
+        1
+      ],
+      "color_hsv_lower": [
+        0,
+        0,
+        50
+      ],
+      "color_hsv_upper": [
+        180,
+        80,
+        255
+      ],
+      "features": "茶叶存放容器，圆柱形/方形/盒状，材质和颜色可能变化较大"
+    }
+  }
+}

@@ -1,0 +1,195 @@
+schema_version: "1.1"
+sop_id: red_tea_front_action_test_v2
+name: 正面机位红茶六步动作联调SOP
+requirement_source: 0611修订茶艺红茶操作流程需求确认表0602.docx
+
+runtime:
+  default_mode: strict
+  formal_mode: strict
+  camera_mode: front
+  clock: monotonic
+  missing_prerequisite_policy: remove_missing
+  note: 当前跳过温度OCR、重量OCR和茶盘托举，仅验证六个大步骤及其小动作。
+
+steps:
+  - {id: step01_setup, order: 1, name: 备具布席}
+  - {id: step02_warm_clean, order: 2, name: 温杯洁具}
+  - {id: step03_tea_preparation, order: 3, name: 投茶准备}
+  - {id: step04_add_tea_smell, order: 4, name: 投茶闻香}
+  - {id: step05_brew, order: 5, name: 注水冲泡}
+  - {id: step06_serve, order: 6, name: 分茶与奉茶}
+
+runtime_nodes:
+  - node_id: setup
+    business_step: step01_setup
+    observation_id: action_setup_ready
+    name: 茶具齐全且人员端坐
+    prerequisites: []
+    action_flow: [检测全部茶具, 检测人员端坐, 稳定保持, 完成备具]
+    requirements:
+      - 盖碗碗身、碗盖、公道杯、品茗杯、茶荷、茶巾、茶夹、茶拨、烧水壶、建水和茶叶罐均被检测
+      - 人员位于桌前，双肩和双髋可见且躯干基本竖直
+    timeout_seconds: 180
+    max_retries: 1
+    min_confidence: 0.45
+    availability: experimental
+
+  - node_id: warm_clean
+    business_step: step02_warm_clean
+    observation_id: seq_warm_clean_front
+    name: 温杯洁具顺序
+    prerequisites: [setup]
+    action_flow: [烧水壶注入盖碗, 盖碗倒入公道杯, 公道杯依次温品茗杯, 废水倒入建水]
+    requirements:
+      - 按盖碗→公道杯→品茗杯→建水顺序完成
+      - 倾倒源器具由手持握，出水端靠近目标并保持约0.5秒
+    timeout_seconds: 240
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: tea_prepare
+    business_step: step03_tea_preparation
+    observation_id: action_tea_canister_to_lotus
+    name: 从茶叶罐取茶到茶荷并归位
+    prerequisites: [warm_clean]
+    action_flow: [手拿茶叶罐, 茶叶罐靠近茶荷, 茶拨完成取茶, 茶叶罐和茶拨远离茶荷]
+    requirements:
+      - 不检查手从茶叶罐到茶荷的转移轨迹
+      - 茶叶罐靠近茶荷不是错误；茶拨需靠近茶叶罐或茶荷
+      - 最后茶叶罐和茶拨均远离茶荷即视为归位
+    timeout_seconds: 150
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: hold_lotus
+    business_step: step04_add_tea_smell
+    observation_id: action_hold_lotus
+    name: 双手托举茶荷从左向右赏茶
+    prerequisites: [tea_prepare]
+    action_flow: [双手接触茶荷两端, 茶荷离开桌面, 从左向右移动赏茶, 开始向左回移结束]
+    requirements:
+      - 只检查双手框与茶荷左右两端接触，不检查齐胸高度
+      - 茶荷相对桌面静置位置发生位移后才算拿起
+      - 向右展示后开始向左移动，完成赏茶并进入投茶
+    timeout_seconds: 150
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: add_tea
+    business_step: step04_add_tea_smell
+    observation_id: action_tea_lotus_to_gaiwan
+    name: 茶荷配合茶拨向盖碗投茶并归位
+    prerequisites: [hold_lotus]
+    action_flow: [茶荷靠近盖碗, 茶荷倾斜, 茶拨靠近茶荷完成投茶, 茶荷和茶拨远离盖碗]
+    requirements:
+      - 茶荷两端关键点用于计算方向，出茶端对准盖碗
+      - 茶拨需靠近茶荷；不验证茶叶是否真实落下
+      - 茶荷和茶拨远离盖碗后判定投茶结束
+    timeout_seconds: 150
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: smell
+    business_step: step04_add_tea_smell
+    observation_id: action_open_lid_smell
+    name: 开盖靠近鼻部闻香
+    prerequisites: [add_tea]
+    action_flow: [确认盖碗打开, 盖碗或持盖手靠近鼻部, 保持闻香, 离开鼻部结束]
+    requirements:
+      - 鼻部直接使用MediaPipe人体关键点，无需人工标注
+      - 先看到开盖证据；遮挡期间允许用靠近鼻部的持盖手继续跟踪
+      - 闻香后远离鼻部即可结束，不强制持续识别碗身和碗盖
+    timeout_seconds: 120
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: water_injection
+    business_step: step05_brew
+    observation_id: action_water_injection
+    name: 烧水壶向盖碗注水
+    prerequisites: [smell]
+    action_flow: [手握烧水壶, 壶嘴靠近盖碗, 壶身形成倾斜, 保持注水动作后移开]
+    requirements:
+      - 壶嘴关键点进入盖碗扩展区域且手靠近烧水壶
+      - 不再强制绕盖碗累计30度，也不强制预先建立离桌高度基线
+      - 只证明规范注水姿态，不证明液体真实流出
+    timeout_seconds: 120
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: lid_close
+    business_step: step05_brew
+    observation_id: action_gaiwan_lid_close_brew
+    name: 注水后盖合碗盖并开始计时
+    prerequisites: [water_injection]
+    action_flow: [检测碗身和碗盖, 两者中心重合, 稳定保持, 发布计时起点]
+    requirements:
+      - 当前步骤已确认注水结束，因此不再要求再次观察完整开盖过程
+      - 碗盖中心接近碗身中心并稳定约0.4秒即可开始计时
+    timeout_seconds: 90
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: brew_time
+    business_step: step05_brew
+    observation_id: result_brew_time_8_12
+    name: 冲泡计时8至12秒
+    prerequisites: [lid_close]
+    action_flow: [碗盖闭合开始计时, 实时显示已冲泡秒数, 手握盖碗停止计时, 判断8至12秒]
+    requirements:
+      - 计时起点为稳定盖合事件
+      - 手握住盖碗视为冲泡结束并进入出汤
+    timeout_seconds: 60
+    max_retries: 0
+    continue_on_failure: true
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: decant
+    business_step: step05_brew
+    observation_id: action_gaiwan_to_pitcher
+    name: 盖碗向公道杯出汤并放回
+    prerequisites: [brew_time]
+    action_flow: [手握盖碗, 盖碗移至公道杯上方, 倾斜保持出汤, 盖碗放回原位]
+    requirements:
+      - 盖碗位于公道杯上方或相邻区域并形成倾斜
+      - 倾倒结束后盖碗回到开始位置附近才算出汤完成
+    timeout_seconds: 150
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: distribution
+    business_step: step06_serve
+    observation_id: action_tea_distribution
+    name: 公道杯依次分茶并放回
+    prerequisites: [decant]
+    action_flow: [手握公道杯, 依次对准三个品茗杯, 保持单方向分茶, 公道杯放回原位]
+    requirements:
+      - 允许从左到右或从右到左，禁止中途折返
+      - 需要确认三个不同品茗杯，最后公道杯回到初始位置附近
+    timeout_seconds: 180
+    max_retries: 1
+    min_confidence: 0.40
+    availability: experimental
+
+  - node_id: serve_layout
+    business_step: step06_serve
+    observation_id: result_cup_layout
+    name: 品茗杯一字形或品字形布局
+    prerequisites: [distribution]
+    action_flow: [检测全部品茗杯, 判断一字形或品字形, 稳定保持, 完成奉茶布局]
+    requirements:
+      - 不要求检测茶盘
+      - 一字形或品字形判定合格，其他布局提示不规范
+    timeout_seconds: 120
+    max_retries: 0
+    min_confidence: 0.45
+    availability: experimental

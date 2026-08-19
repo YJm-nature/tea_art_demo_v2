@@ -1,0 +1,338 @@
+schema_version: "1.0"
+sop_id: red_tea_front_sop_v1
+name: 正面机位红茶茶艺操作SOP
+requirement_source: 0611修订茶艺红茶操作流程需求确认表0602.docx
+ontology: config/ontology_v1.yaml
+
+runtime:
+  default_mode: free_observation
+  formal_mode: strict
+  camera_mode: front
+  clock: monotonic
+  unavailable_observation_policy: omit
+  missing_prerequisite_policy: remove_missing
+  low_confidence_policy: needs_review
+  uncertain_policy: needs_review
+  evidence_frames_per_event: 8
+
+perception:
+  detector: yolov8n
+  detector_profile: tea18_front
+  vessel_pose: yolov8n-pose
+  tracking: bytetrack
+  hands_pose: mediapipe_cpu
+  ocr_primary: opencv_seven_segment
+  ocr_fallback: paddleocr_cpu
+  liquid_detection_enabled: false
+  gesture_proxy_notice: 倾倒事件确认规范动作，不证明液体实际流出或实际倒入量
+
+thresholds:
+  temperature_celsius: [90.0, 95.0]
+  tea_weight_grams: [3.0, 5.0]
+  brew_seconds: [8.0, 12.0]
+  pour_hold_seconds: [0.6, 1.0]
+  low_confidence_review: true
+
+steps:
+  - id: step01_setup
+    order: 1
+    name: 备具布席
+    implementation_status: partial
+    completion_policy: all_required_observations
+    required_objects: [盖碗碗身, 盖碗碗盖, 公道杯, 品茗杯, 茶荷, 茶巾, 茶夹, 茶拨, 茶盘, 烧水壶, 建水, 电子秤, 茶叶罐]
+    observations:
+      - id: obj_utensils_s1
+        name: 备具物品完整性
+        type: object_result
+        status: partial
+        camera_roles: [front]
+        runtime_enabled: false
+
+  - id: step02_warm_clean
+    order: 2
+    name: 温杯洁具
+    implementation_status: experimental
+    completion_policy: ordered_all
+    required_objects: [烧水壶, 水壶显示屏, 盖碗碗身, 公道杯, 品茗杯, 建水]
+    observations:
+      - id: result_water_temperature
+        name: 水温90至95摄氏度
+        type: ocr_result
+        status: experimental
+        target_range: [90.0, 95.0]
+        required_classes: [水壶显示屏]
+      - id: seq_warm_clean_front
+        name: 盖碗至公道杯至品茗杯至建水
+        type: temporal_action
+        status: experimental
+        sequence: [盖碗, 公道杯, 品茗杯, 建水]
+        required_classes: [烧水壶, 盖碗碗身, 公道杯, 品茗杯, 建水]
+        result_limits: {liquid_verified: false}
+
+  - id: step03_tea_preparation
+    order: 3
+    name: 投茶准备
+    implementation_status: experimental
+    completion_policy: ordered_all
+    required_objects: [茶叶罐, 茶荷, 电子秤, 电子秤显示屏]
+    observations:
+      - id: action_tea_canister_to_lotus
+        name: 从茶叶罐取茶至茶荷
+        type: temporal_action
+        status: experimental
+        required_classes: [茶叶罐, 茶荷]
+        result_limits: {tea_leaf_content_verified: false}
+      - id: result_tea_weight
+        name: 投茶重量3至5克
+        type: ocr_result
+        status: experimental
+        target_range: [3.0, 5.0]
+        required_classes: [电子秤显示屏]
+
+  - id: step04_add_tea_smell
+    order: 4
+    name: 投茶闻香
+    implementation_status: experimental
+    completion_policy: ordered_all
+    required_objects: [茶荷, 盖碗碗身, 盖碗碗盖]
+    observations:
+      - id: action_hold_lotus
+        name: 双手托举茶荷赏茶
+        type: temporal_action
+        status: experimental
+        required_classes: [茶荷]
+      - id: action_tea_lotus_to_gaiwan
+        name: 茶叶投入盖碗
+        type: temporal_action
+        status: experimental
+        required_classes: [茶荷, 盖碗碗身]
+        result_limits: {tea_leaf_drop_verified: false}
+      - id: action_open_lid_smell
+        name: 打开盖碗闻香
+        type: temporal_action
+        status: experimental
+        required_classes: [盖碗碗身, 盖碗碗盖]
+
+  - id: step05_brew
+    order: 5
+    name: 注水冲泡与出汤
+    implementation_status: experimental
+    completion_policy: ordered_all
+    required_objects: [烧水壶, 盖碗碗身, 盖碗碗盖, 公道杯]
+    observations:
+      - id: action_water_injection
+        name: 烧水壶向盖碗旋转注水
+        type: temporal_action
+        status: experimental
+        required_classes: [烧水壶, 盖碗碗身]
+        result_limits: {liquid_verified: false}
+      - id: action_gaiwan_lid_close_brew
+        name: 注水后盖合碗盖
+        type: temporal_action
+        status: experimental
+        required_classes: [盖碗碗身, 盖碗碗盖]
+      - id: action_gaiwan_to_pitcher
+        name: 盖碗向公道杯出汤
+        type: temporal_action
+        status: experimental
+        required_classes: [盖碗碗身, 公道杯]
+        result_limits: {liquid_verified: false}
+      - id: result_brew_time_8_12
+        name: 冲泡时间8至12秒
+        type: composite_result
+        status: experimental
+        target_range_seconds: [8.0, 12.0]
+
+  - id: step06_serve
+    order: 6
+    name: 分茶与奉茶
+    implementation_status: experimental
+    completion_policy: ordered_all
+    required_objects: [公道杯, 品茗杯, 茶盘]
+    observations:
+      - id: action_tea_distribution
+        name: 公道杯依次分茶
+        type: temporal_action
+        status: experimental
+        allowed_directions: [从左到右, 从右到左]
+        result_limits: {liquid_verified: false}
+      - id: result_filled_cup_tray_layout
+        name: 品茗杯茶盘布局
+        type: result
+        status: experimental
+        allowed_results: [一字形, 品字形, 不规范摆放]
+        scoring_rules: {一字形: pass, 品字形: pass, 不规范摆放: fail}
+      - id: action_two_hand_serve_tray
+        name: 双手奉茶
+        type: temporal_action
+        status: experimental
+        result_limits: {bow_verified: false}
+
+runtime_nodes:
+  - node_id: setup
+    business_step: step01_setup
+    observation_id: obj_utensils_s1
+    name: 备具布席物品完整性
+    prerequisites: []
+    timeout_seconds: 120
+    max_retries: 1
+    min_confidence: 0.60
+    availability: partial
+    runtime_enabled: false
+
+  - node_id: water_temperature
+    business_step: step02_warm_clean
+    observation_id: result_water_temperature
+    name: 水温90至95摄氏度
+    prerequisites: [setup]
+    timeout_seconds: 60
+    max_retries: 1
+    min_confidence: 0.80
+    availability: experimental
+
+  - node_id: warm_clean
+    business_step: step02_warm_clean
+    observation_id: seq_warm_clean_front
+    name: 温杯洁具完整顺序
+    prerequisites: [water_temperature]
+    timeout_seconds: 90
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: tea_prepare
+    business_step: step03_tea_preparation
+    observation_id: action_tea_canister_to_lotus
+    name: 从茶叶罐取茶至茶荷
+    prerequisites: [warm_clean]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.50
+    availability: experimental
+
+  - node_id: tea_weight
+    business_step: step03_tea_preparation
+    observation_id: result_tea_weight
+    name: 投茶重量3至5克
+    prerequisites: [tea_prepare]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.80
+    availability: experimental
+
+  - node_id: hold_lotus
+    business_step: step04_add_tea_smell
+    observation_id: action_hold_lotus
+    name: 双手托举茶荷赏茶
+    prerequisites: [tea_weight]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.50
+    availability: experimental
+
+  - node_id: add_tea
+    business_step: step04_add_tea_smell
+    observation_id: action_tea_lotus_to_gaiwan
+    name: 茶叶投入盖碗
+    prerequisites: [hold_lotus]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: smell
+    business_step: step04_add_tea_smell
+    observation_id: action_open_lid_smell
+    name: 打开盖碗闻香
+    prerequisites: [add_tea]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: water_injection
+    business_step: step05_brew
+    observation_id: action_water_injection
+    name: 烧水壶向盖碗旋转注水
+    prerequisites: [smell]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: lid_close
+    business_step: step05_brew
+    observation_id: action_gaiwan_lid_close_brew
+    name: 注水后盖合碗盖
+    prerequisites: [water_injection]
+    timeout_seconds: 20
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: decant
+    business_step: step05_brew
+    observation_id: action_gaiwan_to_pitcher
+    name: 盖碗向公道杯出汤
+    prerequisites: [lid_close]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: brew_time
+    business_step: step05_brew
+    observation_id: result_brew_time_8_12
+    name: 冲泡时间8至12秒
+    prerequisites: [decant]
+    timeout_seconds: 30
+    max_retries: 0
+    min_confidence: 0.60
+    availability: experimental
+
+  - node_id: distribution
+    business_step: step06_serve
+    observation_id: action_tea_distribution
+    name: 公道杯依次分茶
+    prerequisites: [brew_time]
+    timeout_seconds: 60
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: serve_layout
+    business_step: step06_serve
+    observation_id: result_filled_cup_tray_layout
+    name: 品茗杯茶盘布局
+    prerequisites: [distribution]
+    timeout_seconds: 30
+    max_retries: 0
+    min_confidence: 0.55
+    availability: experimental
+
+  - node_id: serve_tray
+    business_step: step06_serve
+    observation_id: action_two_hand_serve_tray
+    name: 双手奉茶
+    prerequisites: [serve_layout]
+    timeout_seconds: 30
+    max_retries: 1
+    min_confidence: 0.55
+    availability: experimental
+
+scoring_interface:
+  enabled: true
+  formal_scoring_enabled: false
+  policy: 仅保存每项观测结果、置信度和合格状态；权重待独立测试后锁定
+  event_pass_phase: completed
+  event_fail_phase: failed
+  uncertain_requires_review: true
+
+formal_acceptance:
+  enabled: false
+  reason: 代码链路已完成，需使用新正面数据训练并通过独立测试后才能正式启用评分
+  minimum_event_precision: 0.90
+  minimum_event_recall: 0.85
+  continuous_runtime_minutes: 30
+  low_confidence_must_not_auto_fail: true
+

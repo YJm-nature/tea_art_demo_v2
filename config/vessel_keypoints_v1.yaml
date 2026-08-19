@@ -1,0 +1,25 @@
+schema_version: "1.0"
+task: pose
+kpt_shape: [3, 3]
+flip_idx: [0, 1, 2]
+classes:
+  0:
+    name: 烧水壶
+    keypoints: [壶嘴尖端, 壶身中心, 手柄中心]
+    source_role: kettle
+  1:
+    name: 公道杯
+    keypoints: [出水口, 杯身中心, 手柄中心]
+    source_role: pitcher
+  2:
+    name: 盖碗碗身
+    keypoints: [左碗沿, 右碗沿, 碗底中心]
+    source_role: gaiwan
+  3:
+    name: 茶荷
+    keypoints: [端点A, 中心, 端点B]
+    source_role: lotus
+minimum_keypoint_confidence: 0.35
+minimum_tilt_change_degrees: 6
+target_expansion_ratio: 0.85
+minimum_hold_seconds: 0.60

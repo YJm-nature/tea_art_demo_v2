@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.streamlit/
+
+# Datasets, training runs, and generated output
+dataset/
+training_data/
+runs/
+output/
+
+# Model experiments. Keep only the curated runtime weight below.
+*.pt
+*.task
+models/**
+!models/low_vram/
+models/low_vram/**
+!models/low_vram/front_detect_selected_holdout_stage1-2/
+models/low_vram/front_detect_selected_holdout_stage1-2/**
+!models/low_vram/front_detect_selected_holdout_stage1-2/weights/
+models/low_vram/front_detect_selected_holdout_stage1-2/weights/**
+!models/low_vram/front_detect_selected_holdout_stage1-2/weights/best.pt
+
+# Vendored/local tools and caches
+Ultralytics/
+archive/cache/
+
+# IDE and OS files
+.idea/
+.vscode/
+.vs/
+*.swp
+.DS_Store
+Thumbs.db

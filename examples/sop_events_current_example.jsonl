@@ -1,0 +1,4 @@
+{"observation_id":"action_tea_canister_to_lotus","phase":"completed","end_time":5.0,"confidence":0.90}
+{"observation_id":"action_hold_lotus","phase":"completed","end_time":10.0,"confidence":0.90}
+{"observation_id":"action_open_lid_smell","phase":"completed","end_time":15.0,"confidence":0.90}
+{"observation_id":"result_brew_wait_decant_partial","phase":"completed","end_time":20.0,"confidence":0.90}

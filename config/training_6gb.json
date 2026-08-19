@@ -1,0 +1,44 @@
+{
+  "detect": {
+    "smoke": {"imgsz": 640, "batch": 2, "epochs": 3, "patience": 3},
+    "stage1": {"imgsz": 640, "batch": 4, "epochs": 100, "patience": 20, "lr0": 0.001},
+    "stage2": {"imgsz": 960, "batch": 2, "epochs": 40, "patience": 12, "lr0": 0.0003},
+    "stage2_oom_fallbacks": [
+      {"imgsz": 960, "batch": 1},
+      {"imgsz": 832, "batch": 2},
+      {"imgsz": 640, "batch": 4}
+    ],
+    "stage1280": {"imgsz": 1280, "batch": 1, "epochs": 40, "patience": 10, "lr0": 0.0002, "mosaic": 0.2, "scale": 0.2, "close_mosaic": 8},
+    "stage1280_oom_fallbacks": [
+      {"imgsz": 1152, "batch": 1},
+      {"imgsz": 960, "batch": 1}
+    ]
+  },
+  "pose": {
+    "smoke": {"imgsz": 640, "batch": 2, "epochs": 3, "patience": 3, "fliplr": 0.0},
+    "stage1": {"imgsz": 640, "batch": 2, "epochs": 100, "patience": 20, "lr0": 0.001, "fliplr": 0.0},
+    "stage2": {"imgsz": 960, "batch": 1, "epochs": 40, "patience": 12, "lr0": 0.0003, "fliplr": 0.0},
+    "stage2_oom_fallbacks": [
+      {"imgsz": 832, "batch": 1},
+      {"imgsz": 640, "batch": 2}
+    ]
+  },
+  "segment": {
+    "imgsz": 640,
+    "batch": 2,
+    "epochs": 80,
+    "patience": 15,
+    "oom_fallback": {"imgsz": 512, "batch": 2}
+  },
+  "common": {
+    "device": 0,
+    "workers": 0,
+    "cache": false,
+    "amp": true,
+    "optimizer": "AdamW",
+    "close_mosaic": 10,
+    "cos_lr": true,
+    "pretrained": true,
+    "seed": 42
+  }
+}

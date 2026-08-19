@@ -1,0 +1,12 @@
+# 茶艺红茶 AI视觉实时检测 Demo V2
+# 观测点：备具布席 — 物品准备检测
+# 界面：Streamlit Web
+
+streamlit>=1.28.0
+opencv-python>=4.8,<5
+opencv-contrib-python>=4.12,<5
+numpy>=1.24.0
+Pillow>=10.0.0
+PyYAML>=6,<7
+ultralytics>=8.0.0
+mediapipe>=0.10,<0.11
